@@ -6,7 +6,11 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     git \
-    && docker-php-ext-install zip
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd zip
 
 # Активиране на Apache модули
 RUN a2enmod rewrite headers
@@ -19,6 +23,9 @@ COPY . .
 
 # Инсталиране на Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Добавяне на права на git директорията
+RUN git config --global --add safe.directory /var/www/html
 
 # Инсталиране на зависимостите
 RUN composer install --no-dev
